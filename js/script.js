@@ -11,15 +11,66 @@ function updateCount() {
   count.textContent = list.querySelectorAll(".fav-button.is-favorite").length;
 }
 
-// Задание 1. На input в searchInput переберите .idea-card через querySelectorAll().
-// Сравните data-title с запросом в нижнем регистре и переключите is-hidden.
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.toLowerCase().trim();
+  const cards = list.querySelectorAll(".idea-card");
 
-// Задание 2. На keydown в searchInput обработайте Escape:
-// очистите поле и вызовите обновление поиска (можно dispatchEvent(new Event("input"))).
+  cards.forEach((card) => {
+    const title = (card.dataset.title || "").toLowerCase();
 
-// Задание 3. На submit формы создайте li.idea-card, span и button.fav-button.
-// Запишите data-title, добавьте в список и очистите поле.
-// Обновите фильтр, чтобы новая карточка сразу отображалась корректно.
+    if (title.includes(query)) {
+      card.classList.remove("is-hidden");
+    } else {
+      card.classList.add("is-hidden");
+    }
+  });
+});
 
-// Задание 4. Подключите один click к list. Найдите .fav-button через closest().
-// Переключите is-favorite, aria-pressed и символ ☆ / ★. Вызовите updateCount().
+searchInput.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    searchInput.value = "";
+    searchInput.dispatchEvent(new Event("input"));
+  }
+});
+
+ideaForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const text = ideaInput.value.trim();
+  if (!text) return; 
+  const li = document.createElement("li");
+  li.classList.add("idea-card");
+  li.dataset.title = text; 
+
+  const span = document.createElement("span");
+  span.textContent = text;
+
+  const button = document.createElement("button");
+  button.classList.add("fav-button");
+  button.textContent = "☆";
+  button.setAttribute("aria-pressed", "false");
+
+  li.append(span, button);
+  list.append(li);
+  ideaInput.value = "";
+
+  searchInput.dispatchEvent(new Event("input"));
+});
+
+list.addEventListener("click", (event) => {
+  const favButton = event.target.closest(".fav-button");
+
+  if (favButton) {
+    const isFavorite = favButton.classList.toggle("is-favorite");
+
+    if (isFavorite) {
+      favButton.textContent = "★";
+      favButton.setAttribute("aria-pressed", "true");
+    } else {
+      favButton.textContent = "☆";
+      favButton.setAttribute("aria-pressed", "false");
+    }
+
+    updateCount();
+  }
+});
